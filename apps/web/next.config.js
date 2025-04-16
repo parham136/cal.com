@@ -181,52 +181,61 @@ const nextConfig = {
     });
     return config;
   },
-  async rewrites() {
-    const { orgSlug } = nextJsOrgRewriteConfig;
+ async rewrites() {
+  const { orgSlug } = nextJsOrgRewriteConfig;
 
-    const beforeFiles = [
-      { source: `/:locale/:path*`, destination: "/:path*" },
-      { source: "/forms/:formQuery*", destination: "/apps/routing-forms/routing-link/:formQuery*" },
-      { source: "/routing", destination: "/routing/forms" },
-      { source: "/routing/:path*", destination: "/apps/routing-forms/:path*" },
-      { source: "/success/:path*", has: [{ type: "query", key: "uid", value: "(?<uid>.*)" }], destination: "/booking/:uid/:path*" },
-      { source: "/cancel/:path*", destination: "/booking/:path*" },
-      { source: "/embed.js", destination: "/embed/embed.js" },
-      { source: "/login", destination: "/auth/login" },
-      ...(isOrganizationsEnabled ? [
-        orgDomainMatcherConfig.root && {
-          ...orgDomainMatcherConfig.root,
-          destination: `/team/${orgSlug}?isOrgProfile=1`,
-        },
-        orgDomainMatcherConfig.rootEmbed && {
-          ...orgDomainMatcherConfig.rootEmbed,
-          destination: `/team/${orgSlug}/embed?isOrgProfile=1`,
-        },
-        { ...orgDomainMatcherConfig.user, destination: `/org/${orgSlug}/:user` },
-        { ...orgDomainMatcherConfig.userType, destination: `/org/${orgSlug}/:user/:type` },
-        { ...orgDomainMatcherConfig.userTypeEmbed, destination: `/org/${orgSlug}/:user/:type/embed` },
-      ] : []),
-    ].filter(Boolean);
+  const beforeFiles = [
+    { source: `/:locale/:path*`, destination: "/:path*" },
+    { source: "/forms/:formQuery*", destination: "/apps/routing-forms/routing-link/:formQuery*" },
+    { source: "/routing", destination: "/routing/forms" },
+    { source: "/routing/:path*", destination: "/apps/routing-forms/:path*" },
+    { source: "/success/:path*", has: [{ type: "query", key: "uid", value: "(?<uid>.*)" }], destination: "/booking/:uid/:path*" },
+    { source: "/cancel/:path*", destination: "/booking/:path*" },
+    { source: "/embed.js", destination: "/embed/embed.js" },
+    { source: "/login", destination: "/auth/login" },
+    ...(isOrganizationsEnabled ? [
+      orgDomainMatcherConfig.root && {
+        ...orgDomainMatcherConfig.root,
+        destination: `/team/${orgSlug}?isOrgProfile=1`,
+      },
+      orgDomainMatcherConfig.rootEmbed && {
+        ...orgDomainMatcherConfig.rootEmbed,
+        destination: `/team/${orgSlug}/embed?isOrgProfile=1`,
+      },
+      { ...orgDomainMatcherConfig.user, destination: `/org/${orgSlug}/:user` },
+      { ...orgDomainMatcherConfig.userType, destination: `/org/${orgSlug}/:user/:type` },
+      { ...orgDomainMatcherConfig.userTypeEmbed, destination: `/org/${orgSlug}/:user/:type/embed` },
+    ] : []),
+  ].filter(Boolean);
 
-    const afterFiles = [
-      { source: "/api/v2/:path*", destination: `${process.env.NEXT_PUBLIC_API_V2_URL}/:path*` },
-      { source: "/icons/sprite.svg", destination: `${process.env.NEXT_PUBLIC_WEBAPP_URL}/icons/sprite.svg` },
-    ];
+  const afterFiles = [];
 
-    return { beforeFiles, afterFiles };
-  },
-};
+  if (process.env.NEXT_PUBLIC_API_V2_URL?.startsWith("/")) {
+    afterFiles.push({
+      source: "/api/v2/:path*",
+      destination: process.env.NEXT_PUBLIC_API_V2_URL + "/:path*",
+    });
+  } else if (process.env.NEXT_PUBLIC_API_V2_URL?.startsWith("http")) {
+    afterFiles.push({
+      source: "/api/v2/:path*",
+      destination: `${process.env.NEXT_PUBLIC_API_V2_URL}/:path*`,
+    });
+  }
 
-if (!!process.env.NEXT_PUBLIC_SENTRY_DSN) {
-  plugins.push((cfg) =>
-    withSentryConfig(cfg, {
-      autoInstrumentServerFunctions: false,
-      hideSourceMaps: true,
-      disableServerWebpackPlugin: !!process.env.SENTRY_DISABLE_SERVER_WEBPACK_PLUGIN,
-      silent: false,
-      sourcemaps: { disable: process.env.SENTRY_DISABLE_SERVER_SOURCE_MAPS === "1" },
-    })
-  );
+  if (process.env.NEXT_PUBLIC_WEBAPP_URL?.startsWith("/")) {
+    afterFiles.push({
+      source: "/icons/sprite.svg",
+      destination: process.env.NEXT_PUBLIC_WEBAPP_URL + "/icons/sprite.svg",
+    });
+  } else if (process.env.NEXT_PUBLIC_WEBAPP_URL?.startsWith("http")) {
+    afterFiles.push({
+      source: "/icons/sprite.svg",
+      destination: `${process.env.NEXT_PUBLIC_WEBAPP_URL}/icons/sprite.svg`,
+    });
+  }
+
+  return {
+    beforeFiles,
+    afterFiles,
+  };
 }
-
-module.exports = () => plugins.reduce((acc, next) => next(acc), nextConfig);
