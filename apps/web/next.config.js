@@ -14,8 +14,15 @@ const {
   orgUserTypeRoutePath,
   orgUserTypeEmbedRoutePath,
 } = require("./pagesAndRewritePaths");
-if (!process.env.NEXTAUTH_SECRET) throw new Error("Please set NEXTAUTH_SECRET");
-if (!process.env.CALENDSO_ENCRYPTION_KEY) throw new Error("Please set CALENDSO_ENCRYPTION_KEY");
+
+if (process.env.NODE_ENV !== "production" && !process.env.NEXTAUTH_SECRET) {
+  throw new Error("Please set NEXTAUTH_SECRET");
+}
+
+if (process.env.NODE_ENV !== "production" && !process.env.CALENDSO_ENCRYPTION_KEY) {
+  throw new Error("Please set CALENDSO_ENCRYPTION_KEY");
+}
+
 const isOrganizationsEnabled =
   process.env.ORGANIZATIONS_ENABLED === "1" || process.env.ORGANIZATIONS_ENABLED === "true";
 // To be able to use the version in the app without having to import package.json
