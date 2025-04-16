@@ -1,10 +1,9 @@
-# FROM ghcr.io/calcom/docker:latest
 FROM node:18
 
 WORKDIR /app
 COPY . .
 
-RUN yarn install --frozen-lockfile
+RUN yarn install
 WORKDIR /app/apps/web
 RUN yarn build
 
