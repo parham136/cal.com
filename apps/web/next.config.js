@@ -1,7 +1,6 @@
 require("dotenv").config({ path: "../../../.env" });
+
 const CopyWebpackPlugin = require("copy-webpack-plugin");
-const os = require("os");
-const englishTranslation = require("./public/static/locales/en/common.json");
 const { withAxiom } = require("next-axiom");
 const { withSentryConfig } = require("@sentry/nextjs");
 const { version } = require("./package.json");
@@ -9,39 +8,25 @@ const { version } = require("./package.json");
 if (process.env.NODE_ENV !== "production" && !process.env.NEXTAUTH_SECRET) {
   throw new Error("Please set NEXTAUTH_SECRET");
 }
-
 if (process.env.NODE_ENV !== "production" && !process.env.CALENDSO_ENCRYPTION_KEY) {
   throw new Error("Please set CALENDSO_ENCRYPTION_KEY");
 }
-
 if (process.env.NODE_ENV !== "production" && !process.env.NEXTAUTH_URL) {
   throw new Error("Please set NEXTAUTH_URL");
 }
-
 if (!process.env.NEXT_PUBLIC_API_V2_URL) {
-  console.error("Please set NEXT_PUBLIC_API_V2_URL");
+  throw new Error("Please set NEXT_PUBLIC_API_V2_URL");
 }
 
-const isOrganizationsEnabled =
-  process.env.ORGANIZATIONS_ENABLED === "1" || process.env.ORGANIZATIONS_ENABLED === "true";
-
-const nextConfig = {
+const config = {
   reactStrictMode: true,
   typescript: { ignoreBuildErrors: true },
-  experimental: {
-    serverActions: true,
-    typedRoutes: true
-  },
-  i18n: {
-    locales: ["en"],
-    defaultLocale: "en"
-  },
+  productionBrowserSourceMaps: true,
   env: {
-    VERSION: version,
-    ORGANIZATIONS_ENABLED: isOrganizationsEnabled,
     NEXT_PUBLIC_CALCOM_VERSION: version,
+    NEXT_PUBLIC_API_V2_URL: process.env.NEXT_PUBLIC_API_V2_URL,
   },
-  webpack: (config, { isServer }) => {
+  webpack: (config) => {
     config.plugins.push(
       new CopyWebpackPlugin({
         patterns: [
@@ -52,30 +37,22 @@ const nextConfig = {
         ]
       })
     );
-
     config.resolve.fallback = {
       ...config.resolve.fallback,
       os: false
     };
-
     return config;
   },
   async rewrites() {
     return {
       beforeFiles: [
         {
-          // Handles locale-prefixed dynamic paths
-          source: `/:locale/:path*`,
-          destination: `/:path*`
-        },
-        {
           source: "/forms/:formQuery*",
           destination: "/apps/routing-forms/routing-link/:formQuery*"
-        },
-        ...orgSlug
+        }
       ]
     };
   }
 };
 
-module.exports = withAxiom(withSentryConfig(nextConfig));
+module.exports = withSentryConfig(withAxiom(config));
