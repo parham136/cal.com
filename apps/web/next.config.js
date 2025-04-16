@@ -319,10 +319,10 @@ const nextConfig = {
     const { orgSlug } = nextJsOrgRewriteConfig;
     const beforeFiles = [
       {
-        // This should be the first item in `beforeFiles` to take precedence over other rewrites
-        source: `/(${locales.join("|")})/:path*`,
+        source: `/:locale/:path*`,
         destination: "/:path*",
       },
+
       {
         source: "/forms/:formQuery*",
         destination: "/apps/routing-forms/routing-link/:formQuery*",
