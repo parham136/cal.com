@@ -6,15 +6,6 @@ const { withAxiom } = require("next-axiom");
 const { withSentryConfig } = require("@sentry/nextjs");
 const { version } = require("./package.json");
 
-const nextJsOrgRewriteConfig = require("./.pagesAndRewritePaths");
-
-const {
-  nextJsOrgRewriteConfig: orgSlug,
-  orgUserRoutePath,
-  orgUserTypeRoutePath,
-  orgUserTypeEmbedRoutePath
-} = nextJsOrgRewriteConfig;
-
 if (process.env.NODE_ENV !== "production" && !process.env.NEXTAUTH_SECRET) {
   throw new Error("Please set NEXTAUTH_SECRET");
 }
