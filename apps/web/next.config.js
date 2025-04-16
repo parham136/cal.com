@@ -14,9 +14,7 @@ if (process.env.NODE_ENV !== "production" && !process.env.CALENDSO_ENCRYPTION_KE
 if (process.env.NODE_ENV !== "production" && !process.env.NEXTAUTH_URL) {
   throw new Error("Please set NEXTAUTH_URL");
 }
-if (!process.env.NEXT_PUBLIC_API_V2_URL) {
-  throw new Error("Please set NEXT_PUBLIC_API_V2_URL");
-}
+process.env.NEXT_PUBLIC_API_V2_URL = process.env.NEXT_PUBLIC_API_V2_URL || "https://dummy.api.local";
 
 const config = {
   reactStrictMode: true,
