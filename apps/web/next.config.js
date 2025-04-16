@@ -1,3 +1,4 @@
+// START OF FILE
 require("dotenv").config({ path: "../../.env" });
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const os = require("os");
@@ -23,22 +24,31 @@ if (process.env.NODE_ENV !== "production" && !process.env.CALENDSO_ENCRYPTION_KE
   throw new Error("Please set CALENDSO_ENCRYPTION_KEY");
 }
 
+if (process.env.NODE_ENV !== "production" && !process.env.NEXTAUTH_URL) {
+  throw new Error("Please set NEXTAUTH_URL");
+}
+
+if (!process.env.NEXT_PUBLIC_API_V2_URL) {
+  console.error("Please set NEXT_PUBLIC_API_V2_URL");
+}
+
 const isOrganizationsEnabled =
   process.env.ORGANIZATIONS_ENABLED === "1" || process.env.ORGANIZATIONS_ENABLED === "true";
-// To be able to use the version in the app without having to import package.json
+
 process.env.NEXT_PUBLIC_CALCOM_VERSION = version;
 
-// So we can test deploy previews preview
 if (process.env.VERCEL_URL && !process.env.NEXT_PUBLIC_WEBAPP_URL) {
   process.env.NEXT_PUBLIC_WEBAPP_URL = `https://${process.env.VERCEL_URL}`;
 }
-// Check for configuration of NEXTAUTH_URL before overriding
+
 if (!process.env.NEXTAUTH_URL && process.env.NEXT_PUBLIC_WEBAPP_URL) {
   process.env.NEXTAUTH_URL = `${process.env.NEXT_PUBLIC_WEBAPP_URL}/api/auth`;
 }
+
 if (!process.env.NEXT_PUBLIC_WEBSITE_URL) {
   process.env.NEXT_PUBLIC_WEBSITE_URL = process.env.NEXT_PUBLIC_WEBAPP_URL;
 }
+
 if (
   process.env.CSP_POLICY === "strict" &&
   (process.env.CALCOM_ENV === "production" || process.env.NODE_ENV === "production")
@@ -55,6 +65,9 @@ if (!process.env.EMAIL_FROM) {
     "EMAIL_FROM environment variable is not set, this may indicate mailing is currently disabled. Please refer to the .env.example file."
   );
 }
+
+// ...rest of your file remains the same
+
 
 if (process.env.NODE_ENV !== "production" && !process.env.NEXTAUTH_URL) {
   throw new Error("Please set NEXTAUTH_URL");
